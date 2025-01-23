@@ -73,3 +73,15 @@ class Lot(Base):
     end_time: Mapped[str] = mapped_column(Column(DateTime))
     seller: Mapped[int] = mapped_column(Column(Integer, ForeignKey('users.id')))
     image_path: Mapped[str] = mapped_column(Column(String))
+
+class Log(Base):
+    __tablename__ = 'logs'
+
+    id: Mapped[int] = mapped_column(Column(Integer, primary_key=True))
+    actor: Mapped[int] = mapped_column(Column(Integer, ForeignKey('users.id')))
+    action: Mapped[str] = mapped_column(Column(String))
+    auction_id: Mapped[int] = mapped_column(Column(Integer, ForeignKey('auctions.id')))
+    lot_id: Mapped[int] = mapped_column(Column(Integer, ForeignKey('lots.id')))
+    time: Mapped[str] = mapped_column(Column(DateTime))
+    
+
