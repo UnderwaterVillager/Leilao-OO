@@ -1,34 +1,31 @@
-from sqlalchemy import create_engine, select 
+from sqlalchemy import create_engine, select, text
 from sqlalchemy.orm import Session
 
-class DBOperation:
-    def __init__(self):
-        self.engine = create_engine('sqlite:///app.db')
+from app.models import UserAccount
 
-class QueryDB(DBOperation):
+class QueryDB:
     def __init__(self, table, **filter_params):
-        super().__init__()
+        self.engine = create_engine('sqlite:///app.db')
         self.table = table
         self.filter_params = filter_params
 
     def query(self):
-        if self.filter_params:
-            with Session(self.engine) as session:
-                query = select(self.table).filter_by(self.filter_params)
-                result = session.execute(query)
-        else:
-            with Session(self.engine) as session:
-                query = select(self.table)
-                result = session.execute(query)
-        return result
-
-class WriteDB(DBOperation):
-    def __init__(self, table, **data):
-        super().__init__()
-        self.table = table
-        self.data = data
-
-    def write(self, data):
         with Session(self.engine) as session:
-            session.add(self.table(**data))
+            result = session.query(self.table)
+            if self.filter_params:
+                for attr, value in self.filter_params.items():
+                    result = result.filter(getattr(self.table, attr) == value)
+        return result.all()
+
+class WriteDBUser:
+    def __init__(self, username, password, email):
+        self.engine = create_engine('sqlite:///app.db')
+        self.table = UserAccount
+        self.username = username
+        self.password = password
+        self.email = email 
+
+    def write(self):
+        with Session(self.engine) as session:
+            session.add(self.table(username=self.username, password=self.password, email=self.email))
             session.commit()

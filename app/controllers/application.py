@@ -9,10 +9,10 @@ class Application:
     def home(self):
         return template()
     
-    def login(self):
+    def signup(self):
         return template()
     
-    def signuṕ(self):
+    def login(self):
         return template()
     
     def auction(self):
