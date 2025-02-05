@@ -8,7 +8,6 @@ class UserDataInterface:
     def __init__(self, username, password):
         self.username = username
         self.password = password
-        self.errors = []
     
     def query_data(self, table, **data):
         query = QueryDB(table, **data)
@@ -40,15 +39,24 @@ class SignUp(UserDataInterface):
         has_email = self.query_data(UserAccount, email=self.email)
         if has_username or has_email:
             if has_username:
-                self.errors.append('Nome de usuário já existe')
+                raise ValueError('Erro: Nome de usuário já existe')
             if has_email:
-                self.errors.append('Email já cadastrado')
-            return self.errors
+                raise ValueError('Erro: Email já cadastrado')
         else:
-            print(self.username)
             is_user_created = self.write_data(username=self.username, password=self.encrypt_password(), email=self.email)
             return is_user_created
         
 
 class SignIn(UserDataInterface):
-    ...
+    def __init__(self, username, password):
+        super().__init__(username, password)
+
+    def run(self):
+        user = self.query_data(UserAccount, username=self.username)
+        if user:
+            if self.check_password(user[0].password):
+                return "Usuário está autenticado!"
+            else:
+                raise ValueError("Erro: Senha incorreta!")
+        else:
+            raise ValueError("Erro: Usuário não encontrado!")
