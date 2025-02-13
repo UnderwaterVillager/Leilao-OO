@@ -5,15 +5,18 @@ from app.controllers.application import Application
 app = Bottle()
 ctl = Application()
 
+@app.route('/static/<filename:path>')
+def serve_static(filename):
+    return ctl.serve_static(filename)
 
 @app.route('/')
 def home():
     return ctl.home()
 
 @app.route('/signup')
-@app.route('/signup/<error_message:re:Erro.*!>')
-def signup(error_message=None):
-    return ctl.signup(error_message)
+def signup():
+    error = request.query.error
+    return ctl.signup(error=error)
 
 @app.route('/signup', method='POST')
 def signup_post():

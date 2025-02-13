@@ -4,18 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="/static/styles/userpage.css">
 </head>
 <body>
-    <form action="/signup" method="POST">
-        Nome de Usuário:<input name="username" type="text">
-        Email:<input name="email" type="text">
-        Senha:<input name="password" type="text">
-        Confirmar:<input type="submit">
+    <form method="POST" action="/signup">
+        <label for="username">Nome de Usuário:</label>
+        <input id="username" name="username" type="text">
+        
+        <label for="email">Email:</label>
+        <input id="email" name="email" type="text">
+        
+        <label for="password">Senha</label>
+        <input id="password" name="password" type="text">
+        
+        <input type="submit">
     </form>
-    % if error_message:
-        <div>
-            {error_message}
-        </div>
-    % end
+    <div>
+        % if error:
+            <p>{{error}}</p>
+        % end
+    </div>
+    <script src="/static/scripts/signup.js"></script>
 </body>
 </html>
