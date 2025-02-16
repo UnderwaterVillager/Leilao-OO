@@ -1,7 +1,7 @@
 import bcrypt
 from sqlalchemy import text
 
-from .data_handler import WriteDBUser, QueryDB
+from .data_handler import QueryDB, WriteDBUser, WriteDBAuction
 from ..models import UserAccount
 
 class UserDataInterface:
@@ -17,7 +17,7 @@ class UserDataInterface:
     def write_data(self, username, password, email):
         writer = WriteDBUser(username, password, email)
         writer.write()
-        return 'Dado registrado com sucesso'
+        return 'Usuário registrado com sucesso'
 
     def encrypt_password(self):
         bytes = self.password.encode('utf-8')
@@ -60,3 +60,27 @@ class SignIn(UserDataInterface):
                 raise ValueError("Erro: Senha incorreta!")
         else:
             raise ValueError("Erro: Usuário não encontrado!")
+        
+class AuctionWrite:
+    def __init__(self, user):
+        self.user = user
+        self.title = ''
+        self.description = ''
+        self.start_time = ''
+        self.end_time = ''
+
+    def create_auction(self, title, description, start_time, end_time):
+        if title == '':
+            raise ValueError("Erro: Título não enviado")
+        if description == '':
+            raise ValueError("Erro: Descrição vazia!")
+        if start_time == '': 
+            raise ValueError("Erro: Início do leilão vazio!")
+        if end_time == '':
+            raise ValueError("Erro: Fim do leilão vazio!")
+        auction_writer = WriteDBAuction(username=self.user, title=title, description=description, start_time=start_time, end_time=end_time)
+        auction_writer.write()
+        return "Leilao registrado com sucesso"
+
+    def cancel_auction(self):
+        ...

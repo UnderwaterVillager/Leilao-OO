@@ -1,10 +1,9 @@
 import unittest
-import requests
 
 from app.models import create, destroy
 from app.controllers.interfaces import SignUp, SignIn
 
-class TestWriteUserData(unittest.TestCase):
+class TestSignIn(unittest.TestCase):
     @classmethod
     def setUpClass(self):
         destroy()
@@ -17,7 +16,7 @@ class TestWriteUserData(unittest.TestCase):
         signup = SignUp(username, password, email)
         result = signup.run()
         
-        self.assertEqual(result, 'Dado registrado com sucesso')
+        self.assertEqual(result, 'Usuário registrado com sucesso')
 
     def test_duplicate_username(self):
         username = 'tester'
@@ -28,7 +27,7 @@ class TestWriteUserData(unittest.TestCase):
             signup = SignUp(username, password, email)
             result = signup.run()
         
-        self.assertEqual(str(context.exception), 'Nome de usuário já existe')
+        self.assertEqual(str(context.exception), 'Erro: Nome de usuário já existe')
 
     def test_duplicate_email(self):
         username = 'tester1'
@@ -39,7 +38,7 @@ class TestWriteUserData(unittest.TestCase):
             signup = SignUp(username, password, email)
             result = signup.run()
         
-        self.assertEqual(str(context.exception), 'Email já cadastrado')
+        self.assertEqual(str(context.exception), 'Erro: Email já cadastrado')
 
 class TestLogIn(unittest.TestCase):
     def setUp(self):
@@ -57,16 +56,17 @@ class TestLogIn(unittest.TestCase):
             login = SignIn('Marco', '101')
             result = login.run()
 
-        self.assertEqual(str(context.exception), "Senha incorreta!")
+        self.assertEqual(str(context.exception), "Erro: Senha incorreta!")
 
     def test_read_credentials_user_not_found(self):
         with self.assertRaises(ValueError) as context:
             login = SignIn('Joe', '909')
             result = login.run()
 
-        self.assertEqual(str(context.exception), "Usuário não encontrado!")
+        self.assertEqual(str(context.exception), "Erro: Usuário não encontrado!")
 
-
-if __name__ == '__main__':
-    unittest.main()
-
+class TestWriteAuction(unittest.TestCase):
+    def setUp(self):
+        destroy()
+        create()
+        SignUp('Marco', 'Polo', 'shambala@yahoo.com').run()  

@@ -49,8 +49,6 @@ class Application:
     def auction_display(self):
         return template('auctions')
     
-    def get_auctions(self):
-        ...
 
     def lot(self):
         return template()
