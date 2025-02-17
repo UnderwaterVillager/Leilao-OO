@@ -1,2 +1,2 @@
 from .test_user import TestSignIn, TestLogIn
-from .test_auction import TestWriteAuction
+from .test_auction import TestWriteAuction, TestGetAuction
