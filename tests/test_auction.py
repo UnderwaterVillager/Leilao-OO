@@ -75,8 +75,6 @@ class TestGetAuction(unittest.TestCase):
         writer2.create_auction(title="Instrumentos músicas de iniciante!", description="Desde instrumentos de cordas, percursão e teclas, com funcionalidades básicas e custo-benéficas!", start_time=start_time, end_time=end_time)
 
     def test_get_auction_all_users(self):
-        self.maxDiff = None
-
         auction_one = QueryDB(Auction, id=1).query()[0].__dict__
         auction_two = QueryDB(Auction, id=2).query()[0].__dict__
         auction_three = QueryDB(Auction, id=3).query()[0].__dict__
@@ -84,8 +82,20 @@ class TestGetAuction(unittest.TestCase):
         del auction_two['_sa_instance_state']
         del auction_three['_sa_instance_state']
         
-        getter = AuctionGet('Marco')
+        getter = AuctionGet(user='Marco')
         auctions = getter.get_auctions()
         auctions_dict = [auction for auction in auctions]
         self.assertListEqual([auction_one, auction_two, auction_three], auctions_dict)
 
+    def test_get_my_auctions(self):
+        self.maxDiff = None
+
+        auction_one = QueryDB(Auction, id=1).query()[0].__dict__
+        auction_two = QueryDB(Auction, id=2).query()[0].__dict__
+        del auction_one['_sa_instance_state']
+        del auction_two['_sa_instance_state']
+
+        getter = AuctionGet(user='Marco')
+        auctions = getter.get_auctions(by_owner=True)
+        auctions_dict_list = [auction for auction in auctions]
+        self.assertListEqual([auction_one, auction_two], auctions_dict_list)

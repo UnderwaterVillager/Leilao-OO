@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import create_engine, select, text
+from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import Session
 
 from app.models import UserAccount, Auction
@@ -16,10 +16,10 @@ class QueryDB:
         if self.join_tables:
             with Session(self.engine) as session:
                 result = session.query(self.table)
-                for join_table, join_filter_list in self.join_tables:
-                    result = result.join(join_table)
-                    for attr, value in join_filter_list:
-                        result = result.filter(getattr(join_table, attr) == value)
+                for join_table in self.join_tables:
+                    result = result.join(join_table['join_table'], and_(*join_table['conditions']))
+                    for attr, value in join_table['filters'].items():
+                        result = result.filter(getattr(join_table['join_table'], attr) == value)
                 if self.filter_params:
                     for attr, value in self.filter_params.items():
                         result = result.filter(getattr(self.table, attr) == value)

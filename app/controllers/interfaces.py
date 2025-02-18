@@ -129,11 +129,11 @@ class AuctionWrite(AuctionOperation):
 class AuctionGet(AuctionOperation):
     def get_auctions(self, by_owner=False):
         auctions_data = []
-        if not by_owner:
+        if by_owner == False:
             auctions = QueryDB(Auction).query()
         else:
-            auctions = QueryDB(Auction, {"table_join": UserAccount, "filters": [{"username":
-            self.user}]}).query()
+            auctions = QueryDB((Auction), {'join_table': UserAccount, 'filters': {"username":
+            self.user}, 'conditions': [Auction.seller_id == UserAccount.id]}).query()
         for data in auctions:
             data = data.__dict__
             del data['_sa_instance_state']
