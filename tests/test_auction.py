@@ -2,7 +2,8 @@ import unittest
 import datetime
 
 from app.models import create, destroy
-from app.controllers.interfaces import SignUp, AuctionWrite, AuctionGet
+from app.models import UserAccount, Auction
+from app.controllers.interfaces import SignUp, AuctionWrite, AuctionGet, QueryDB
 
 class TestWriteAuction(unittest.TestCase):
     def setUp(self):
@@ -69,14 +70,22 @@ class TestGetAuction(unittest.TestCase):
         
         writer1 = AuctionWrite(user='Marco')
         writer1.create_auction(title='Consoles que morreram antes da hora!', description='Gemas do games que, apesar de partirem cedo, ainda carregam um espaço enorme no coração de jogadores', start_time=start_time, end_time=end_time)
+        writer1.create_auction(title="Vasos de porcelana", description="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec et nisi et neque iaculis sodales et sit amet ex. Vestibulum tincidunt imperdiet nunc at auctor.", start_time=start_time, end_time=end_time)
         writer2 = AuctionWrite(user='João')
         writer2.create_auction(title="Instrumentos músicas de iniciante!", description="Desde instrumentos de cordas, percursão e teclas, com funcionalidades básicas e custo-benéficas!", start_time=start_time, end_time=end_time)
 
     def test_get_auction_all_users(self):
+        self.maxDiff = None
+
+        auction_one = QueryDB(Auction, id=1).query()[0].__dict__
+        auction_two = QueryDB(Auction, id=2).query()[0].__dict__
+        auction_three = QueryDB(Auction, id=3).query()[0].__dict__
+        del auction_one['_sa_instance_state']
+        del auction_two['_sa_instance_state']
+        del auction_three['_sa_instance_state']
+        
         getter = AuctionGet('Marco')
         auctions = getter.get_auctions()
-        self.assertIsInstance(auctions, list)
+        auctions_dict = [auction for auction in auctions]
+        self.assertListEqual([auction_one, auction_two, auction_three], auctions_dict)
 
-    def test_get_auction_one_user(self):
-        ...
-    

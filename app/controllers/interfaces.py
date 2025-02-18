@@ -63,6 +63,9 @@ class SignIn(UserDataInterface):
         else:
             raise ValueError("Erro: Usuário não encontrado!")
 
+
+
+
 @dataclass
 class AuctionOperation:
     user: str
@@ -125,13 +128,15 @@ class AuctionWrite(AuctionOperation):
     
 class AuctionGet(AuctionOperation):
     def get_auctions(self, by_owner=False):
+        auctions_data = []
         if not by_owner:
             auctions = QueryDB(Auction).query()
         else:
-            auctions = QueryDB(Auction, username=self.user).query()
-
-        auctions_data = [data.__dict__ for data in auctions]
+            auctions = QueryDB(Auction, {"table_join": UserAccount, "filters": [{"username":
+            self.user}]}).query()
+        for data in auctions:
+            data = data.__dict__
+            del data['_sa_instance_state']
+            auctions_data.append(data)
         return auctions_data
         
-    def get_auction(self):
-        ...

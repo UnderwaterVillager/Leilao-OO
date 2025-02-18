@@ -6,18 +6,31 @@ from sqlalchemy.orm import Session
 from app.models import UserAccount, Auction
 
 class QueryDB:
-    def __init__(self, table, **filter_params):
+    def __init__(self, main_table, *join_tables, **filter_params):
         self.engine = create_engine('sqlite:///app.db')
-        self.table = table
+        self.table = main_table
+        self.join_tables = join_tables
         self.filter_params = filter_params
 
     def query(self):
-        with Session(self.engine) as session:
-            result = session.query(self.table)
-            if self.filter_params:
-                for attr, value in self.filter_params.items():
-                    result = result.filter(getattr(self.table, attr) == value)
-        return result.all()
+        if self.join_tables:
+            with Session(self.engine) as session:
+                result = session.query(self.table)
+                for join_table, join_filter_list in self.join_tables:
+                    result = result.join(join_table)
+                    for attr, value in join_filter_list:
+                        result = result.filter(getattr(join_table, attr) == value)
+                if self.filter_params:
+                    for attr, value in self.filter_params.items():
+                        result = result.filter(getattr(self.table, attr) == value)
+            return result.all()
+        else:
+            with Session(self.engine) as session:
+                result = session.query(self.table)
+                if self.filter_params:
+                    for attr, value in self.filter_params.items():
+                        result = result.filter(getattr(self.table, attr) == value)
+            return result.all()
 
 class WriteDB(ABC):
     def __init__(self, username):
