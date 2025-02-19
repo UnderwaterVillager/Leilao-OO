@@ -1,5 +1,5 @@
 import unittest
-from tests import TestWriteAuction, TestGetAuction
+from tests import TestCreateLot
 
 if __name__ == '__main__':
     unittest.main()
