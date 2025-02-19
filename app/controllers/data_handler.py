@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from sqlalchemy import create_engine, and_
+from sqlalchemy import create_engine, and_, delete, select
 from sqlalchemy.orm import Session
 
-from app.models import UserAccount, Auction
+from app.models import UserAccount, Auction, Lot
 
 class QueryDB:
     def __init__(self, main_table, *join_tables, **filter_params):
@@ -67,4 +67,44 @@ class WriteDBAuction(WriteDB):
             user_query = session.query(UserAccount).filter_by(username=self.username)[0]
             session.add(self.table(seller=user_query, title=self.title, description=self.description, start_time=self.start_time, end_time=self.end_time))
             session.commit()
-                
+    
+    
+# class DestroyerDB(ABC):    
+#     def __init__(self, username):
+#         self.engine = create_engine('sqlite:///app.db')
+#         self.username = username
+
+#     @abstractmethod
+#     def delete(self, id, username):
+#         pass
+
+# class DestroyedDBAuction(DestroyerDB):
+#     def __init__(self, username):
+#         super().__init__(username)
+#         self.table = Auction
+
+#     def delete(self, id, username):
+#         with Session(self.engine) as session:
+#             subquery = select(self.table.seller_id).join(UserAccount).where(UserAccount.username == username)
+#             stmt= delete(self.table).where(and_(self.table.id == id, self.table.seller_id.in_(subquery)))
+#             session.execute(stmt)
+#             session.commit()
+
+class WriteDBLot(WriteDB):
+    def __init__(self, username, auction_id, title, description, start_price, buy_now_price, start_time, end_time):
+        super().__init__(username)
+        self.table = Lot
+        self.auction_id = auction_id
+        self.title = title
+        self.description = description
+        self.start_price = start_price
+        self.buy_now_price = buy_now_price
+        self.start_time = start_time
+        self.end_time = end_time
+
+    def write(self):
+        with Session(self.engine) as session:
+            auction_query = session.query(Auction).join(UserAccount, Auction.seller_id == UserAccount.id).where(UserAccount.username == self.username).where(Auction.id == self.auction_id).first()
+            session.add(self.table(auction_id=auction_query.id, title=self.title, description=self.description, start_price=self.start_price, buy_now_price=self.buy_now_price, start_time=self.start_time, end_time=self.end_time))
+            session.commit()
+    

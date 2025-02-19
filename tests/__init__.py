@@ -1,2 +1,3 @@
 from .test_user import TestSignIn, TestLogIn
 from .test_auction import TestWriteAuction, TestGetAuction
+from .test_lot import TestCreateLot

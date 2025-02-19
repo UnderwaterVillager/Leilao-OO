@@ -16,16 +16,13 @@ class Lot(Base):
     buy_now_price: Mapped[float] = mapped_column(Float)
     start_time: Mapped[str] = mapped_column(DateTime)
     end_time: Mapped[str] = mapped_column(DateTime)
-    image_path: Mapped[str] = mapped_column(String)
+    image_path: Mapped[Optional[str]] = mapped_column(String)
 
     auction_id: Mapped[Optional[int]] = mapped_column(ForeignKey('auctions.id'))
     auction: Mapped[Optional["Auction"]] = relationship("Auction", back_populates="lots")
     documents: Mapped[List["Document"]] = relationship("Document", back_populates="lot")
     bids: Mapped[List["Bid"]] = relationship("Bid", back_populates="lot")
     logs: Mapped[List["Log"]] = relationship("Log", back_populates="lot")
-
-    seller_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'), nullable=False)
-    seller: Mapped[Optional["UserAccount"]] = relationship("UserAccount", back_populates="sold_lots", foreign_keys=[seller_id])
 
     buyer_id: Mapped[Optional[int]] = mapped_column(ForeignKey('users.id'), nullable=True)
     buyer: Mapped[Optional["UserAccount"]] = relationship("UserAccount", back_populates="bought_lots", foreign_keys=[buyer_id])
@@ -44,7 +41,6 @@ class UserAccount(Base):
     bids: Mapped[List["Bid"]] = relationship("Bid", back_populates="bidder")
     notifications: Mapped[List["Notification"]] = relationship("Notification", back_populates="user")
     logs: Mapped[List["Log"]] = relationship("Log", back_populates="actor")
-    sold_lots: Mapped[List["Lot"]] = relationship("Lot", back_populates="seller", foreign_keys=[Lot.seller_id])
     bought_lots: Mapped[List["Lot"]] = relationship("Lot", back_populates="buyer", foreign_keys=[Lot.buyer_id])
 
 

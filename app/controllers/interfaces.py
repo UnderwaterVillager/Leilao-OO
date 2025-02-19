@@ -1,9 +1,8 @@
 from dataclasses import dataclass
 
 import bcrypt
-from sqlalchemy import text
 
-from .data_handler import QueryDB, WriteDBUser, WriteDBAuction
+from .data_handler import QueryDB, WriteDBUser, WriteDBAuction, WriteDBLot
 from ..models import UserAccount, Auction
 
 class UserDataInterface:
@@ -63,58 +62,54 @@ class SignIn(UserDataInterface):
         else:
             raise ValueError("Erro: Usuário não encontrado!")
 
+@dataclass
+class BidOperation:
+    user: str
 
+    def create_bid(self, lot_id, amount, time):
+        pass
+    def get_bids(self, lot_id):
+        pass
 
+@dataclass
+class LotOperation:
+    user: str
+
+    def create_lot(self, auction_id=None, title='', description='', start_price=None, buy_now_price=None, start_time='', end_time=''):
+        if auction_id == None:
+            raise ValueError("Erro: Sem leilão a relacionar!")
+        if title == '':
+            raise ValueError("Erro: Título não enviado!")
+        if description == '':
+            raise ValueError("Erro: Descrição vazia!")
+        if start_price == None:
+            raise ValueError("Erro: Preço inicial não informado!")
+        if buy_now_price == None:
+            raise ValueError("Erro: Preço de compra imediata não informado!")
+        if start_time == '': 
+            raise ValueError("Erro: Início do lote vazio!")
+        if end_time == '':
+            raise ValueError("Erro: Fim do lote vazio!")
+        writer = WriteDBLot(self.user, auction_id, title, description, start_price, buy_now_price, start_time, end_time)
+        writer.write()
+        return "Lote criado e associado a leilão!"
+
+    def get_lots(self, auction_id):
+        pass
+    
+    def get_lot(self, lot_id):
+        pass
+
+    def append_bid(self):
+        pass
 
 @dataclass
 class AuctionOperation:
     user: str
-    _auction_id : int = None
-    _title: str = ''
-    _description: str = ''
-    _start_time: str = ''
-    _end_time: str = '' 
 
-    @property
-    def auction_id(self):
-        return self._auction_id
-    @property
-    def title(self):
-        return self._title
-    @property
-    def description(self):
-        return self._description
-    @property
-    def start_time(self):
-        return self._start_time
-    @property
-    def end_time(self):
-        return self._end_time
-    
-    @auction_id.setter
-    def auction_id(self, value):
-        self._auction_id = value
-
-    @title.setter
-    def title(self, value):
-        self._title = value
-
-    @description.setter
-    def description(self, value):
-        self._description = value
-
-    @start_time.setter
-    def start_time(self, value):
-        self._start_time = value
-
-    @end_time.setter
-    def end_time(self, value):
-        self._end_time = value
-
-class AuctionWrite(AuctionOperation):
-    def create_auction(self, title, description, start_time, end_time):
+    def create_auction(self='', title='', description='', start_time='', end_time=''):
         if title == '':
-            raise ValueError("Erro: Título não enviado")
+            raise ValueError("Erro: Título não enviado!")
         if description == '':
             raise ValueError("Erro: Descrição vazia!")
         if start_time == '': 
@@ -123,10 +118,8 @@ class AuctionWrite(AuctionOperation):
             raise ValueError("Erro: Fim do leilão vazio!")
         auction_writer = WriteDBAuction(username=self.user, title=title, description=description, start_time=start_time, end_time=end_time)
         auction_writer.write()
-        return "Leilao registrado com sucesso"
+        return "Leilao registrado com sucesso!"
 
-    
-class AuctionGet(AuctionOperation):
     def get_auctions(self, by_owner=False):
         auctions_data = []
         if by_owner == False:
@@ -139,4 +132,24 @@ class AuctionGet(AuctionOperation):
             del data['_sa_instance_state']
             auctions_data.append(data)
         return auctions_data
-        
+    
+    def get_one_auction(self, auction_id):
+        if not auction_id:
+            raise ValueError("Não foi fornecido leilão para buscar!")
+        auction = QueryDB(Auction, id=auction_id).query()[0]
+        auction = auction.__dict__
+        del auction['_sa_instance_state']
+        return auction
+    
+    def append_lot(self, auction_id, title, description, start_price, buy_now_price, start_time, end_time):
+        try:    
+            if not auction_id:
+                raise ValueError("Não foi fornecido leilão para buscar lotes!")
+            lot_writer = LotOperation(self.user)
+            message = lot_writer.create_lot(auction_id=auction_id, title=title, description=description, start_price=start_price, buy_now_price=buy_now_price, start_time=start_time, end_time=end_time)
+            return message
+        except ValueError:
+            raise ValueError("Erro em adicionar lote a leilão!")
+    # def delete_auction(self):
+    # destroyer = WriteDBAuction(self.user, )
+    # return "Leilão deletado com sucesso!"
