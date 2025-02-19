@@ -1,4 +1,4 @@
-from bottle import template, request, redirect, Response, static_file
+from bottle import template, request, redirect, response, static_file
 from .interfaces import SignUp, SignIn
 
 class Application:
@@ -20,19 +20,36 @@ class Application:
     def signup_post(self, username, email, password):
         try:
             user_register = SignUp(username=username, password=password, email=email)
-            user_register.run()
-            return {"message": "Usuário registrado com sucesso!"}
+            message = user_register.run()
+            if message:
+                response.set_cookie("user", username)
+                redirect('/auction_display')
 
         except ValueError as e:
             redirect(f'/signup?error={e}')
 
     
-    def login(self):
-        return template()
+    def signin(self, error=None):
+        if error:
+            return template('signin', error=error)
+        else:
+            return template('signin', error=None)
     
-    def auction(self):
-        return template()
+    def signin_post(self, username, password):
+        try:
+            user_signin = SignIn(username=username, password=password)
+            message = user_signin.run()
+            if message:
+                response.set_cookie("user", username)
+                redirect('/auction_display')
+
+        except ValueError as e:
+            redirect(f'/signin?error={e}')
+
+    def auction_display(self):
+        return template('auctions')
     
+
     def lot(self):
         return template()
     

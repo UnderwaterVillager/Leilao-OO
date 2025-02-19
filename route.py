@@ -25,5 +25,20 @@ def signup_post():
     password = request.forms.password
     return ctl.signup_post(username, email, password)
 
+@app.route('/signin')
+def signin():
+    error = request.query.error
+    return ctl.signin(error=error)
+
+@app.route('/signin', method='POST')
+def signin_post():
+    username = request.forms.username
+    password = request.forms.password
+    return ctl.signin_post(username, password)
+
+@app.route('/auction_display')
+def auction_display():
+    return ctl.auction_display()
+
 if __name__ == "__main__":
     app.run(debug=True)
